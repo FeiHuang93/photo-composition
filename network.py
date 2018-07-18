@@ -1,10 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 12 15:56:17 2017
-
-@author: jason
-"""
 
 import tensorflow as tf
 import numpy as np
@@ -25,7 +20,7 @@ def svm_loss(feature_vec, loss_matrix):  # svm 损失值
     q = score(feature_vec)
     p = tf.matmul(loss_matrix,q)
     zero = tf.constant(0.0, shape=[1], dtype=tf.float32)
-    p_hinge = tf.maximum(zero, 1+p)
+    p_hinge = tf.maximum(zero, 1+p)     # 根据论文中的公式
     L = tf.reduce_mean(p_hinge)
     return L, p
 
@@ -45,8 +40,18 @@ def loss(feature_vec, loss_matrix, ranking_loss_type):
 
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group=1):
     '''From https://github.com/ethereon/caffe-tensorflow
+        封装系统卷积函数
+    input：具有[batch, in_height, in_width, in_channels]这样的shape的输入图像tensor
+    kernel：具有[filter_height, filter_width, in_channels, out_channels]这样shape的卷积核，in_channels为图像通道数，out_channels为卷积核个数
+    biases：偏差向量
+    k_h：卷积核高度
+    k_w：卷积核宽度
+    c_o：卷积核个数
+    s_h：stride高度步长
+    s_w：stride宽度步长
+    group：图像的第二维度
     '''
-    c_i = input.get_shape()[-1]
+    c_i = input.get_shape()[-1]     # 获取图像通道数
     assert c_i%group==0
     assert c_o%group==0
     convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)  
@@ -59,7 +64,7 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w,  padding="VALID", group
         output_groups = [convolve(i, k) for i,k in zip(input_groups, kernel_groups)]
         conv = tf.concat(output_groups, 3)
     return  tf.reshape(tf.nn.bias_add(conv, biases), [-1]+conv.get_shape().as_list()[1:])  
-    # tf.nn.bias_add(conv, biases):将偏差项bias加到conv上,conv.get_shape().as_list()得到具体的尺寸
+    # tf.nn.bias_add(conv, biases):将偏差项bias加到conv上,conv.get_shape().as_list()得到具体的尺寸, [-1]拼接在矩阵前,表示可自动推断维度大小
 
 def get_variable_dict(net_data):
     variables_dict = {
@@ -82,6 +87,9 @@ def get_variable_dict(net_data):
 def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling = 'max'):
     """
         构建网络
+    images：具有[batch, in_height, in_width, in_channels]这样的shape的输入图像tensor
+    variable_dict：预训练Alexnet模型的参数字典
+    embedding_dim：fc1的输出为1000个神经元
     """
     #conv1
     #conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
@@ -177,6 +185,6 @@ def build_alexconvnet(images, variable_dict, embedding_dim, SPP = False, pooling
     fc6W = tf.get_variable("fc6w", [flattened_dim, embedding_dim], initializer = tf.uniform_unit_scaling_initializer()) # init_weight((flattened_dim, embedding_dim))
     fc6b = tf.get_variable("fc6b", [embedding_dim], initializer = tf.constant_initializer())  #init_bias([embedding_dim])
 
-    fc6 = tf.nn.relu_layer(bn5, fc6W, fc6b)
+    fc6 = tf.nn.relu_layer(bn5, fc6W, fc6b)    # fc6=relu(bm5 * fc6w + fc6b)
 
     return fc6

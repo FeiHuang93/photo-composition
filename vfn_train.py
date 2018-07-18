@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 20 18:05:41 2016
-
-@author: jan
-"""
 
 import tensorflow as tf
 import numpy as np
@@ -199,7 +194,7 @@ if __name__ == '__main__':
         _, loss_val = sess.run([apply_grad_op, L])
         t1 = time.time()
         print "Iteration {}: L={:0.4f} dT={:0.3f}".format(step, loss_val, t1-t0)    # 输出步数、loss值与迭代间隔时间
-        if step % validation_interval == 0 and step > 0:
+        if step % validation_interval == 0 and step > 0:     # 每500张图测试一次，即500个batch_size为14
             val_avg = 0.0
             for k in range(validation_instances/batch_size_val):
                 val_loss = sess.run([L_val])[0]

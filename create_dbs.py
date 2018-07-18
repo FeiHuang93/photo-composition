@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 27 18:28:02 2016
 
-@author: jan
-"""
 import numpy as np
 import skimage.transform as transform
 import skimage.io as io
@@ -22,13 +18,12 @@ def _float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 def _bytes_feature(value):
-    return tf.train.Feature(byte
-        s_list=tf.train.BytesList(value=[value]))
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
 def create_database(tfr_file, image_folder, mtdb, offset, n, size, crops, n_crops):
     """
-        image to tfRecord
+        transfer image to tfRecord
     tfr_file:    转换后的tfRecord文件名
     image_folder:需要转换的图片路径
     mtdb:        crop 图片数据列表
